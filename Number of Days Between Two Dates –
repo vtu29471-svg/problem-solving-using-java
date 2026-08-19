@@ -1,0 +1,47 @@
+class Solution {
+public:
+    bool isLeap(int year) {
+        return (year % 400 == 0) || 
+               (year % 4 == 0 && year % 100 != 0);
+    }
+
+    int daysFromStart(int year, int month, int day) {
+        int days = 0;
+
+        int monthDays[] = {
+            31, 28, 31, 30, 31, 30,
+            31, 31, 30, 31, 30, 31
+        };
+
+        for (int y = 1; y < year; y++) {
+            days += isLeap(y) ? 366 : 365;
+        }
+
+        for (int m = 1; m < month; m++) {
+            days += monthDays[m - 1];
+
+            if (m == 2 && isLeap(year)) {
+                days++;
+            }
+        }
+
+        days += day;
+
+        return days;
+    }
+
+    int daysBetweenDates(string date1, string date2) {
+        int y1 = stoi(date1.substr(0, 4));
+        int m1 = stoi(date1.substr(5, 2));
+        int d1 = stoi(date1.substr(8, 2));
+
+        int y2 = stoi(date2.substr(0, 4));
+        int m2 = stoi(date2.substr(5, 2));
+        int d2 = stoi(date2.substr(8, 2));
+
+        return abs(
+            daysFromStart(y1, m1, d1) -
+            daysFromStart(y2, m2, d2)
+        );
+    }
+};
