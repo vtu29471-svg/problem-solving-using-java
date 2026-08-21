@@ -1,0 +1,30 @@
+import java.util.*;
+
+public class Solution {
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int n = sc.nextInt();
+        int primaryDiagonal = 0;
+        int secondaryDiagonal = 0;
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                int value = sc.nextInt();
+
+                if (i == j) {
+                    primaryDiagonal += value;
+                }
+
+                if (i + j == n - 1) {
+                    secondaryDiagonal += value;
+                }
+            }
+        }
+
+        System.out.println(Math.abs(primaryDiagonal - secondaryDiagonal));
+
+        sc.close();
+    }
+}
