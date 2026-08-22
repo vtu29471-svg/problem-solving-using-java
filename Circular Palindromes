@@ -1,0 +1,183 @@
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+
+    // Manacher's algorithm on the transformed string.
+    //
+    // For s = "abc", transformed representation is:
+    // # a # b # c #
+    //
+    // rad[i] = palindrome radius around transformed index i.
+    static int[] manacher(String s) {
+        int n = s.length();
+
+        // transformed length = 2*n + 1
+        int[] a = new int[2 * n + 1];
+
+        for (int i = 0; i < a.length; i++) {
+            if ((i & 1) == 1) {
+                a[i] = s.charAt(i / 2);
+            } else {
+                a[i] = -1; // separator
+            }
+        }
+
+        int[] rad = new int[a.length];
+
+        int center = 0;
+        int right = 0;
+
+        for (int i = 0; i < a.length; i++) {
+            int mirror = 2 * center - i;
+
+            if (i < right) {
+                rad[i] = Math.min(right - i, rad[mirror]);
+            }
+
+            while (i - rad[i] - 1 >= 0 &&
+                   i + rad[i] + 1 < a.length &&
+                   a[i - rad[i] - 1] == a[i + rad[i] + 1]) {
+                rad[i]++;
+            }
+
+            if (i + rad[i] > right) {
+                center = i;
+                right = i + rad[i];
+            }
+        }
+
+        return rad;
+    }
+
+    // Sparse Table for range maximum queries.
+    static class SparseTable {
+        int[][] table;
+        int[] log;
+
+        SparseTable(int[] arr) {
+            int n = arr.length;
+
+            log = new int[n + 1];
+
+            for (int i = 2; i <= n; i++) {
+                log[i] = log[i / 2] + 1;
+            }
+
+            int levels = log[n] + 1;
+            table = new int[levels][n];
+
+            System.arraycopy(arr, 0, table[0], 0, n);
+
+            for (int k = 1; k < levels; k++) {
+                int len = 1 << k;
+                int half = len >> 1;
+
+                for (int i = 0; i + len <= n; i++) {
+                    table[k][i] = Math.max(
+                            table[k - 1][i],
+                            table[k - 1][i + half]
+                    );
+                }
+            }
+        }
+
+        int query(int left, int right) {
+            if (left > right) {
+                return 0;
+            }
+
+            int length = right - left + 1;
+            int k = log[length];
+
+            return Math.max(
+                    table[k][left],
+                    table[k][right - (1 << k) + 1]
+            );
+        }
+    }
+
+    static int n;
+    static SparseTable rmq;
+
+    /*
+     * Checks whether the rotation starting at 'start'
+     * contains a palindrome of length 'len'.
+     */
+    static boolean possible(int start, int len) {
+
+        /*
+         * The rotation corresponds to:
+         *
+         * doubled[start ... start+n-1]
+         *
+         * In transformed coordinates:
+         *
+         * L = 2*start + 1
+         * R = 2*(start+n-1) + 1
+         */
+        int L = 2 * start + 1;
+        int R = 2 * (start + n - 1) + 1;
+
+        /*
+         * For a palindrome of length len to fit,
+         * its center must be at least len-1 positions
+         * from both boundaries.
+         */
+        int leftCenter = L + len - 1;
+        int rightCenter = R - len + 1;
+
+        if (leftCenter > rightCenter) {
+            return false;
+        }
+
+        // Is there a center whose palindrome radius >= len?
+        return rmq.query(leftCenter, rightCenter) >= len;
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        BufferedReader br = new BufferedReader(
+                new InputStreamReader(System.in)
+        );
+
+        n = Integer.parseInt(br.readLine().trim());
+        String s = br.readLine().trim();
+
+        // Every rotation is a length-n substring of s+s.
+        String doubled = s + s;
+
+        // Manacher on doubled string.
+        int[] radius = manacher(doubled);
+
+        // Range maximum queries over Manacher radii.
+        rmq = new SparseTable(radius);
+
+        StringBuilder output = new StringBuilder();
+
+        // start = starting position of each rotation.
+        for (int start = 0; start < n; start++) {
+
+            int low = 1;
+            int high = n;
+            int answer = 1;
+
+            // Binary search for the maximum palindrome length.
+            while (low <= high) {
+
+                int mid = low + (high - low) / 2;
+
+                if (possible(start, mid)) {
+                    answer = mid;
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+
+            output.append(answer).append('\n');
+        }
+
+        System.out.print(output);
+    }
+}
