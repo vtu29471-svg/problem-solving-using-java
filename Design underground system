@@ -1,9 +1,3 @@
-
-You should **not copy those lines** into the LeetCode editor. Copy only the Java code itself.
-
-Use this:
-
-:::writing{variant="document" id="58321" title="Java Solution"}
 import java.util.*;
 
 class UndergroundSystem {
@@ -65,6 +59,3 @@ class UndergroundSystem {
         }
     }
 }
-:::
-
-**Important:** Copy from `import java.util.*;` through the final `}` only. Do **not** copy ` ```java ` or ` ``` `.
