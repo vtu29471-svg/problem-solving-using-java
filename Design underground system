@@ -1,0 +1,70 @@
+
+You should **not copy those lines** into the LeetCode editor. Copy only the Java code itself.
+
+Use this:
+
+:::writing{variant="document" id="58321" title="Java Solution"}
+import java.util.*;
+
+class UndergroundSystem {
+
+    private Map<Integer, CheckIn> checkInData;
+    private Map<String, Travel> travelData;
+
+    public UndergroundSystem() {
+        checkInData = new HashMap<>();
+        travelData = new HashMap<>();
+    }
+
+    public void checkIn(int id, String stationName, int t) {
+        checkInData.put(id, new CheckIn(stationName, t));
+    }
+
+    public void checkOut(int id, String stationName, int t) {
+        CheckIn checkIn = checkInData.get(id);
+
+        String key = checkIn.station + "#" + stationName;
+        int travelTime = t - checkIn.time;
+
+        if (travelData.containsKey(key)) {
+            Travel travel = travelData.get(key);
+            travel.totalTime += travelTime;
+            travel.count++;
+        } else {
+            travelData.put(key, new Travel(travelTime, 1));
+        }
+
+        checkInData.remove(id);
+    }
+
+    public double getAverageTime(String startStation, String endStation) {
+        String key = startStation + "#" + endStation;
+
+        Travel travel = travelData.get(key);
+
+        return (double) travel.totalTime / travel.count;
+    }
+
+    static class CheckIn {
+        String station;
+        int time;
+
+        CheckIn(String station, int time) {
+            this.station = station;
+            this.time = time;
+        }
+    }
+
+    static class Travel {
+        int totalTime;
+        int count;
+
+        Travel(int totalTime, int count) {
+            this.totalTime = totalTime;
+            this.count = count;
+        }
+    }
+}
+:::
+
+**Important:** Copy from `import java.util.*;` through the final `}` only. Do **not** copy ` ```java ` or ` ``` `.
